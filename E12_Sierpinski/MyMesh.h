@@ -120,6 +120,16 @@ public:
 	*/
 	virtual void Render(matrix4 a_mProjection, matrix4 a_mView, matrix4 a_mWorld);
 
+	/*
+	USAGE: renders the object in wireframe mode
+	ARGUMENTS:
+	matrix4 a_mViewProjection -> View * Projection matrix
+	matrix4 a_mToWorld -> to world matrix
+	vector3 a_v3Color -> Color to render
+	OUTPUT: ---
+	*/
+	virtual void RenderList(matrix4 a_mProjectionMatrix, matrix4 a_mViewMatrix, float* a_fMatrixArray, int a_nInstances);
+
 protected:
 	/*
 	USAGE: Initialize the object's fields

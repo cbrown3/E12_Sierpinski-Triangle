@@ -30,6 +30,7 @@ public:
 	typedef ReEngAppClass super;
 
 	MyMesh* m_pMesh = nullptr;
+	MyMesh* m_pTriangleMesh = nullptr;
 	float* m_fMatrixArray = nullptr;
 	int m_nObjects = 200;
 

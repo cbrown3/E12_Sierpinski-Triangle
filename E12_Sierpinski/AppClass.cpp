@@ -12,22 +12,26 @@ void AppClass::InitVariables(void)
 
 	m_pMesh = new MyMesh();
 	
+	m_pTriangleMesh = new MyMesh();
+
 	//Creating the Mesh points
 	m_pMesh->AddVertexPosition(vector3(-1.0f, -1.0f, 0.0f));
 	m_pMesh->AddVertexColor(RERED);
 	m_pMesh->AddVertexPosition(vector3( 1.0f, -1.0f, 0.0f));
 	m_pMesh->AddVertexColor(RERED);
-	m_pMesh->AddVertexPosition(vector3(-1.0f,  1.0f, 0.0f));
+	m_pMesh->AddVertexPosition(vector3(0.0f,  1.0f, 0.0f));
 	m_pMesh->AddVertexColor(RERED);
-	m_pMesh->AddVertexPosition(vector3(-1.0f,  1.0f, 0.0f));
-	m_pMesh->AddVertexColor(REBLUE);
-	m_pMesh->AddVertexPosition(vector3(1.0f, -1.0f, 0.0f));
-	m_pMesh->AddVertexColor(REBLUE);
-	m_pMesh->AddVertexPosition(vector3( 1.0f, 1.0f, 0.0f));
-	m_pMesh->AddVertexColor(REBLUE);
 
+	//Creating the Mesh points
+	m_pTriangleMesh->AddVertexPosition(vector3(-1.0f, -1.0f, 0.0f));
+	m_pTriangleMesh->AddVertexColor(REWHITE);
+	m_pTriangleMesh->AddVertexPosition(vector3(1.0f, -1.0f, 0.0f));
+	m_pTriangleMesh->AddVertexColor(REWHITE);
+	m_pTriangleMesh->AddVertexPosition(vector3(0.0f, 1.0f, 0.0f));
+	m_pTriangleMesh->AddVertexColor(REWHITE);
 	//Compiling the mesh
 	m_pMesh->CompileOpenGL3X();
+	m_pTriangleMesh->CompileOpenGL3X();
 }
 
 void AppClass::Update(void)
@@ -65,8 +69,42 @@ void AppClass::Display(void)
 	matrix4 m4Projection = m_pCameraMngr->GetProjectionMatrix();
 	matrix4 m4View = m_pCameraMngr->GetViewMatrix();
 
-	m_pMesh->Render(m4Projection, m4View, IDENTITY_M4);//Rendering nObject(s)											   //clear the screen
-	
+	m_pMesh->Render(m4Projection, m4View, IDENTITY_M4);//Rendering nObject(s)
+
+	//matricies for triangle
+	matrix4 rotateMatrix = glm::rotate(180.0f, vector3(0.0f, 0.0f, 1.0f));
+	matrix4 scaleMatrix = glm::scale(vector3(0.5f, 0.5f, 1.0f));
+	matrix4 translateMatrix = glm::translate(vector3(0.0f, 1.0f, 0.0f));
+
+	matrix4 triangleMatrix = rotateMatrix * scaleMatrix * translateMatrix;
+
+	m_pTriangleMesh->Render(m4Projection, m4View, triangleMatrix);
+
+	for (int i = 0; i < 3; i++)
+	{
+		matrix4 scale1Matrix = scaleMatrix * glm::scale(vector3(0.5f, 0.5f, 0.0f));
+		matrix4 translate1Matrix = translateMatrix * glm::translate(vector3(0.0f, -0.75f, 0.0f));
+		matrix4 scale2Matrix = scaleMatrix * glm::scale(vector3(0.5f, 0.5f, 0.0f));
+		matrix4 translate2Matrix = translateMatrix * glm::translate(vector3(0.5f, -1.75f, 0.0f));
+		matrix4 scale3Matrix = scaleMatrix * glm::scale(vector3(0.5f, 0.5f, 0.0f));
+		matrix4 translate3Matrix = translateMatrix * glm::translate(vector3(-0.5f, -1.75f, 0.0f));
+		
+		switch (i)
+		{
+		case 0:
+			triangleMatrix = translate1Matrix * rotateMatrix * scale1Matrix;
+			break;
+		case 1:
+			triangleMatrix = translate2Matrix * rotateMatrix * scale2Matrix;
+			break;
+		case 2:
+			triangleMatrix = translate3Matrix * rotateMatrix * scale3Matrix;
+			break;
+		}
+
+		m_pTriangleMesh->Render(m4Projection, m4View, triangleMatrix);
+	}
+
 	m_pMeshMngr->Render(); //renders the render list
 	m_pMeshMngr->ClearRenderList(); //Reset the Render list after render
 	m_pGLSystem->GLSwapBuffers(); //Swaps the OpenGL buffers

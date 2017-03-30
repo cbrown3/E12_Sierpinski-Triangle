@@ -207,3 +207,47 @@ void MyMesh::Render(matrix4 a_mProjectionMatrix, matrix4 a_mViewMatrix, matrix4 
 
 	glBindVertexArray(0);
 }
+
+void MyMesh::RenderList(matrix4 a_mProjectionMatrix, matrix4 a_mViewMatrix, float* a_fMatrixArray, int a_nInstances)
+{
+	if (!m_bBinded)
+		return;
+
+	GLuint nShader = m_pShaderMngr->GetShaderID("BasicColor");
+	// Use the buffer and shader
+	glUseProgram(nShader);
+
+	glBindVertexArray(m_VAO);
+
+	// Get the GPU variables by their name and hook them to CPU variables
+	GLuint MVP = glGetUniformLocation(nShader, "MVP");
+
+	GLuint gl_nInstances = glGetUniformLocation(nShader, "nElements");
+	GLuint mToWorldArray = glGetUniformLocation(nShader, "mToWorldArray");
+
+	//Final Projection of the Camera
+	glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(a_mProjectionMatrix * a_mViewMatrix));
+
+	glUniform1i(gl_nInstances, a_nInstances);
+	glUniformMatrix4fv(mToWorldArray, a_nInstances, GL_FALSE, a_fMatrixArray);
+
+	//Number of Instances
+	uint nSections = a_nInstances / 250;
+	uint nRemainders = a_nInstances - (250 * nSections);
+	uint nInstances = a_nInstances;
+	for (uint n = 0; n < nSections; n++)
+	{
+		glUniform1i(gl_nInstances, 250);
+		glUniformMatrix4fv(mToWorldArray, 250, GL_FALSE, &a_fMatrixArray[n * 250 * 16]);
+
+		glDrawArraysInstanced(GL_TRIANGLES, 0, m_uVertexCount, 250);
+	}
+
+	glUniform1i(gl_nInstances, nRemainders);
+	glUniformMatrix4fv(mToWorldArray, nRemainders, GL_FALSE, &a_fMatrixArray[nSections * 250 * 16]);
+
+	//Draw
+	glDrawArraysInstanced(GL_TRIANGLES, 0, m_uVertexCount, nRemainders);
+
+	glBindVertexArray(0);
+}
